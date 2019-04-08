@@ -36,7 +36,7 @@ def round_robin(prc, quantum):
         elif processes[i].arrival_time > time:
             i = (i + 1) % len(processes)
 
-        if processes[i].burst_done < quantum:
+        if processes[i].duration - processes[i].burst_done > quantum:
             processes[i].burst_done += quantum
             time += quantum
             if len(outdict) > 0:
