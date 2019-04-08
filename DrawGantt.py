@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QApplication
 
 
 def gantt(df):
-    fig = ff.create_gantt(df, group_tasks=True)
+    fig = ff.create_gantt(df,  index_col='Task', group_tasks=True)
     fig['layout']['xaxis'].update({'type': '-'})
     plotly.offline.plot(fig, filename='schedule.html', auto_open=False)
 
