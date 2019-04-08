@@ -3,6 +3,8 @@ from priority import priority_scheduling
 from sjf import sjf
 from roundRobin import round_robin
 from Processes_Class import FCFS
+from DrawGantt import gantt
+
 
 task_list = []
 
@@ -177,21 +179,25 @@ class Ui_MainWindow(object):
         burst = str(self.burst.text())
         priority = str(self.priority.text())
 
-        task = dict(task=name, arrival_time=int(arrive_time), burst_time=int(burst), priority=priority)
+        task = dict(task=name, arrival_time=int(arrive_time),
+                    burst_time=int(burst), priority=priority)
         task_list.append(task)
 
         rowPosition = self.tasks.rowCount()
         self.tasks.insertRow(rowPosition)
         self.tasks.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(name))
-        self.tasks.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(arrive_time))
+        self.tasks.setItem(
+            rowPosition, 1, QtWidgets.QTableWidgetItem(arrive_time))
         self.tasks.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(burst))
-        self.tasks.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(priority))
+        self.tasks.setItem(
+            rowPosition, 3, QtWidgets.QTableWidgetItem(priority))
 
     def schedule(self):
         if self.scheduling_algorithm == "Round Robin":
             output_list = round_robin(task_list, int(self.quantum.text()))
         elif self.scheduling_algorithm == "Priority":
-            output_list = priority_scheduling(task_list, self.preemptive.isChecked())
+            output_list = priority_scheduling(
+                task_list, self.preemptive.isChecked())
         elif self.scheduling_algorithm == "FCFS":
             output_list = FCFS(task_list)
         elif self.scheduling_algorithm == "SJF":
@@ -199,7 +205,8 @@ class Ui_MainWindow(object):
         else:
             output_list = []
 
-        print(output_list)
+        self.w = gantt(output_list[0])
+        self.w.show()
 
 
 if __name__ == "__main__":
