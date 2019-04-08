@@ -1,14 +1,11 @@
 from roundRobin import *
 
-p1 = Process(0,5)
-p2 = Process(30,9)
-p3 = Process(2,7)
-p4 = Process(2,5)
-p5 = Process(4,6)
-p = [p1,p2,p3,p4,p5]
-out = roundRobin(p,4)
-i=1
-for x in out:
-    print("process",i,":")
-    x.printProcess()
-    i+=1
+p = [{'arrival_time': 0, 'task': "0", "burst_time": 5}, {'arrival_time': 30, 'task': "1", "burst_time": 9},
+     {'arrival_time': 2, 'task': "2", "burst_time": 7}, {'arrival_time': 2, 'task': "3", "burst_time": 5},
+     {'arrival_time': 4, 'task': "4", "burst_time": 6}]
+
+out = round_robin(p, 4)
+for x in out[0]:
+    print(x)
+
+print(out[1])

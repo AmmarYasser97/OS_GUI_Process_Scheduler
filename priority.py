@@ -1,30 +1,42 @@
 def priority_scheduling(processes, preemptive):
     output = []
+    waiting_time = 0
+    total = len(processes)
     if not preemptive:
+        current_time = 0
         while len(processes) > 0:
-            current = minimum_arrive_time(processes)
+            current = minimum_arrival_time(processes)
             process = schedule(current, output, preemptive, 0)
+            waiting_time += (current_time - process["arrival_time"])
             output.append(process)
+            current_time += process["burst_time"]
             processes.remove(process)
     else:
+        waiting_time -= sum(x['burst_time'] for x in processes)
         current_process = {}
-        for current_time in range(sum(x['burst_time'] for x in processes)):
+        for current_time in range(
+                sum(x['burst_time'] for x in processes) + min(x['arrival_time'] for x in processes) + 1):
+            if bool(current_process) and processes[processes.index(current_process)]["burst_time"] == 0:
+                waiting_time += (current_time -
+                                 current_process["arrival_time"])
+                processes.remove(current_process)
+            if len(processes) == 0:
+                break
             current_process = schedule(
                 processes, output, preemptive, current_time)
             output.append(current_process)
             processes[processes.index(current_process)]["burst_time"] -= 1
-            if processes[processes.index(current_process)]["burst_time"] == 0:
-                processes.remove(current_process)
-                current_process = {}
 
-    return output
+    output = reshape_output(output, preemptive)
+
+    return [output, waiting_time / total]
 
 
 def schedule(in_list, output, preemptive, current_time):
     temp = []
     if not preemptive:
         for process in in_list:
-            if process["arrive_time"] <= (sum(x['burst_time'] for x in output)):
+            if process["arrival_time"] <= (sum(x['burst_time'] for x in output)):
                 temp.append(process)
 
         temp.sort(key=priority_sorting)
@@ -34,7 +46,7 @@ def schedule(in_list, output, preemptive, current_time):
 
     else:
         for process in in_list:
-            if process["arrive_time"] <= current_time:
+            if process["arrival_time"] <= current_time:
                 temp.append(process)
         temp.sort(key=priority_sorting)
         temp.reverse()
@@ -43,11 +55,11 @@ def schedule(in_list, output, preemptive, current_time):
     return next
 
 
-def minimum_arrive_time(processes):
-    minimum = processes[0]["arrive_time"]
+def minimum_arrival_time(processes):
+    minimum = processes[0]["arrival_time"]
     output = []
     for process in processes:
-        if process["arrive_time"] <= minimum:
+        if process["arrival_time"] <= minimum:
             output.append(process)
     return output
 
@@ -56,27 +68,27 @@ def priority_sorting(element):
     return element["priority"]
 
 
-task0 = {
-    "id": 0,
-    "arrive_time": 1,
-    "burst_time": 3,
-    "priority": 0,
-}
+def reshape_output(scheduled_processes, preemptive):
+    gantt = []
+    if preemptive:
+        for process in scheduled_processes:
+            if len(gantt) != 0 and gantt[-1]["Task"] != process["task"]:
+                gantt.append({"Task": process["task"], "Start": gantt[-1]['Finish'], "Finish": gantt[-1]['Finish'] + 1})
 
-task1 = {
-    "id": 1,
-    "arrive_time": 0,
-    "burst_time": 2,
-    "priority": 1,
-}
+            elif len(gantt) == 0:
+                gantt.append(
+                    {"Task": process["task"], "Start": process['arrival_time'], "Finish": process['arrival_time'] + 1})
+            else:
+                gantt[-1]["Finish"] += 1
 
-task2 = {
-    "id": 2,
-    "arrive_time": 1,
-    "burst_time": 1,
-    "priority": 2,
-}
-
-scheduled = priority_scheduling([task0, task1, task2], True)
-for x in scheduled:
-    print(x)
+    else:
+        for process in scheduled_processes:
+            if len(gantt) == 0:
+                gantt.append(
+                    {"Task": process["task"], "Start": process['arrival_time'],
+                     "Finish": process['arrival_time'] + process['burst_time']})
+            else:
+                gantt.append(
+                    {"Task": process["task"], "Start": gantt[-1]['Finish'],
+                     "Finish": gantt[-1]['Finish'] + process['burst_time']})
+    return gantt
