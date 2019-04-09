@@ -31,17 +31,9 @@ class Processes:
         return self.FCFS_List, self.waiting_time
 
 
-p = Processes()
-p.addProcess('P1', 1, 3, 0)
-p.addProcess('P2', 2, 4, 0)
-p.addProcess('P3', 5, 6, 0)
-
-print(p.FCFS())
-
-
 def FCFS(process):
     FCFS_List = []
-    waiting_time=0
+    waiting_time = 0
     # Sort According to the Arrival Time
     process.sort(key=lambda x: x["arrival_time"])
     # Implementation of FCFS List
@@ -61,4 +53,3 @@ def FCFS(process):
 
     waiting_time /= len(process)
     return FCFS_List, waiting_time
-

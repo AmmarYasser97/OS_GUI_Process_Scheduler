@@ -5,7 +5,6 @@ from roundRobin import round_robin
 from Processes_Class import FCFS
 from DrawGantt import gantt
 
-
 task_list = []
 
 
@@ -92,23 +91,26 @@ class Ui_MainWindow(object):
         self.tasks = QtWidgets.QTableWidget(self.centralwidget)
         self.tasks.setGeometry(QtCore.QRect(10, 220, 741, 281))
         self.tasks.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.tasks.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.tasks.setEditTriggers(QtWidgets.QAbstractItemView.AllEditTriggers)
         self.tasks.setTabKeyNavigation(False)
         self.tasks.setProperty("showDropIndicator", False)
         self.tasks.setDragDropOverwriteMode(False)
         self.tasks.setWordWrap(False)
         self.tasks.setCornerButtonEnabled(False)
         self.tasks.setObjectName("tasks")
-        self.tasks.setColumnCount(4)
+        self.tasks.setColumnCount(5)
         self.tasks.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
         self.tasks.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
+        # item.setData = (QtCore.Qt.EditRole, 100) todo
         self.tasks.setHorizontalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
         self.tasks.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
         self.tasks.setHorizontalHeaderItem(3, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tasks.setHorizontalHeaderItem(4, item)
         self.tasks.horizontalHeader().setDefaultSectionSize(175)
         MainWindow.setCentralWidget(self.centralwidget)
 
@@ -143,6 +145,8 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "Burst Time"))
         item = self.tasks.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "Priority"))
+        item = self.tasks.horizontalHeaderItem(4)
+        item.setText(_translate("MainWindow", "Edit"))
 
     #
     #
@@ -192,6 +196,15 @@ class Ui_MainWindow(object):
         self.tasks.setItem(
             rowPosition, 3, QtWidgets.QTableWidgetItem(priority))
 
+        delete_btn = QtWidgets.QPushButton(self.tasks)
+        self.tasks.setCellWidget(rowPosition, 4, delete_btn)
+
+        #self.tasks.setItem(
+        #    rowPosition, 4, QtWidgets.QTableWidgetItem('Edit'))
+        # self.schedule_btn.setGeometry(QtCore.QRect(580, 10, 171, 91))
+        # self.schedule_btn.setObjectName("schedule_btn")
+        # self.schedule_btn.clicked.connect(self.schedule)
+
     def schedule(self):
         if self.scheduling_algorithm == "Round Robin":
             output_list = round_robin(task_list, int(self.quantum.text()))
@@ -205,7 +218,7 @@ class Ui_MainWindow(object):
         else:
             output_list = []
 
-        self.w = gantt(output_list[0])
+        self.w = gantt(output_list)
         self.w.show()
 
 
