@@ -33,8 +33,19 @@ def round_robin(prc, quantum):
             i = (i + 1) % len(processes)
             time += 1
             continue
-        elif processes[i].arrival_time > time:
-            i = (i + 1) % len(processes)
+        #put flag to check if all processes are after current time 
+        f=False
+        for p in processes:
+            if processes[i].arrival_time > time:
+                f=True
+                i = (i + 1) % len(processes)
+            else:
+                f= False
+                break
+        if f:
+            time +=1
+            continue
+            
 
         if processes[i].duration - processes[i].burst_done > quantum:
             processes[i].burst_done += quantum
