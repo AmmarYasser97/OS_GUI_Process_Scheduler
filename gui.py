@@ -4,6 +4,7 @@ from sjf import sjf
 from roundRobin import round_robin
 from Processes_Class import FCFS
 from DrawGantt import gantt
+import os
 
 task_list = []
 
@@ -72,12 +73,14 @@ class Ui_MainWindow(object):
         self.arrive_time = QtWidgets.QSpinBox(self.Quantum_Box_2)
         self.arrive_time.setGeometry(QtCore.QRect(10, 30, 91, 21))
         self.arrive_time.setObjectName("arrive_time")
+        self.arrive_time.setMinimum(0)
         self.Quantum_Box_3 = QtWidgets.QGroupBox(self.groupBox)
         self.Quantum_Box_3.setGeometry(QtCore.QRect(400, 40, 141, 61))
         self.Quantum_Box_3.setObjectName("Quantum_Box_3")
         self.burst = QtWidgets.QSpinBox(self.Quantum_Box_3)
         self.burst.setGeometry(QtCore.QRect(10, 30, 91, 21))
         self.burst.setObjectName("burst")
+        self.burst.setMinimum(1)
         self.Priority_Box = QtWidgets.QGroupBox(self.groupBox)
         self.Priority_Box.setGeometry(QtCore.QRect(550, 40, 111, 61))
         self.Priority_Box.setObjectName("Priority_Box")
@@ -199,7 +202,7 @@ class Ui_MainWindow(object):
         delete_btn = QtWidgets.QPushButton(self.tasks)
         self.tasks.setCellWidget(rowPosition, 4, delete_btn)
 
-        #self.tasks.setItem(
+        # self.tasks.setItem(
         #    rowPosition, 4, QtWidgets.QTableWidgetItem('Edit'))
         # self.schedule_btn.setGeometry(QtCore.QRect(580, 10, 171, 91))
         # self.schedule_btn.setObjectName("schedule_btn")
@@ -218,8 +221,19 @@ class Ui_MainWindow(object):
         else:
             output_list = []
 
-        self.w = gantt(output_list)
+        self.w = gantt(output_list, self)
         self.w.show()
+
+    def new_schedule(self):
+        self.scheduling_algorithm = 'FCFS'
+        self.output_list = []
+        # TODO: can't empty global list
+        task_list = []
+        self.tasks.setRowCount(0)
+        os.remove("schedule.html")
+        self.task_name.clear()
+        self.arrive_time.setValue(0)
+        self.burst.setValue(1)
 
 
 if __name__ == "__main__":
