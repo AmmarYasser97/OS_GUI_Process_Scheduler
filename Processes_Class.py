@@ -43,13 +43,14 @@ def FCFS(process):
                 {"Task": process[0]["task"], "Start": process[0]["arrival_time"],
                  "Finish": (process[0]["burst_time"] + process[0]["arrival_time"])})
         else:
+            gstart = max([FCFS_List[i - 1]["Finish"],process[i]['arrival_time']])
             FCFS_List.append(
-                {"Task": process[i]["task"], "Start": max([FCFS_List[i - 1]["Finish"], process[i]['arrival_time']]),
-                 "Finish": process[i]["burst_time"] + FCFS_List[i - 1]
-                 ["Finish"]})
+                {"Task": process[i]["task"], "Start": gstart,"Finish": process[i]["burst_time"] + gstart})
 
             waiting_time += FCFS_List[i - 1]["Finish"] - process[i]["arrival_time"]
 
     waiting_time /= len(process)
+    if waiting_time<0:
+        waiting_time = 0
     return FCFS_List, waiting_time
 

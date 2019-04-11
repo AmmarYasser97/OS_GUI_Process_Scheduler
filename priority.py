@@ -38,7 +38,8 @@ def priority_scheduling(processes, preemptive):
 
     print(output)
     output = reshape_output(output, preemptive)
-
+    if waiting_time<0 :
+        waiting_time = 0
     return [output, waiting_time / total]
 
 

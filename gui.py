@@ -188,6 +188,8 @@ class Ui_MainWindow(object):
 
         task = dict(task=name, arrival_time=int(arrive_time),
                     burst_time=int(burst), priority=priority)
+        
+        global task_list
         task_list.append(task)
 
         rowPosition = self.tasks.rowCount()
@@ -209,6 +211,7 @@ class Ui_MainWindow(object):
         # self.schedule_btn.clicked.connect(self.schedule)
 
     def schedule(self):
+        global task_list
         if self.scheduling_algorithm == "Round Robin":
             output_list = round_robin(task_list, int(self.quantum.text()))
         elif self.scheduling_algorithm == "Priority":
@@ -220,14 +223,16 @@ class Ui_MainWindow(object):
             output_list = sjf(task_list, self.preemptive.isChecked())
         else:
             output_list = []
-
+        for x in output_list[0]:
+            x["Resource"]=x["Task"]
+            x["Task"]="Processes"
+        
         self.w = gantt(output_list, self)
         self.w.show()
 
     def new_schedule(self):
         self.scheduling_algorithm = 'FCFS'
-        self.output_list = []
-        # TODO: can't empty global list
+        global task_list
         task_list = []
         self.tasks.setRowCount(0)
         os.remove("schedule.html")

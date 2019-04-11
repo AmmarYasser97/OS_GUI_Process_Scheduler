@@ -10,8 +10,8 @@ import bs4
 
 
 def gantt(df, parent_window):
-    fig = ff.create_gantt(df[0], index_col='Task',
-                          group_tasks=True, showgrid_x=True, showgrid_y=True)
+    fig = ff.create_gantt(df[0], index_col='Resource',
+                          group_tasks=True, showgrid_x=True, showgrid_y=True, show_colorbar=True)
     fig['layout']['xaxis'].update({'type': '-'})
     plotly.offline.plot(fig, filename='schedule.html', auto_open=False)
 
