@@ -105,8 +105,8 @@ def sjf(input_list, is_preemptive=False):
                                     "Finish": end_time[i]})
 
                 waiting_time.append(start_time[i] - input_list[i]['arrival_time'])
-        if waiting_time<0:
-            waiting_time=0
+        #if waiting_time<0:
+        #    waiting_time=0
         return output_list, average(waiting_time)
 
 

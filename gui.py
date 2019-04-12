@@ -1,10 +1,13 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 from priority import priority_scheduling
 from sjf import sjf
 from roundRobin import round_robin
 from Processes_Class import FCFS
 from DrawGantt import gantt
 import os
+from functools import partial
+
 
 task_list = []
 
@@ -27,6 +30,13 @@ class Ui_MainWindow(object):
         self.schedule_btn.setGeometry(QtCore.QRect(580, 10, 171, 91))
         self.schedule_btn.setObjectName("schedule_btn")
         self.schedule_btn.clicked.connect(self.schedule)
+        self.schedule_btn.setDisabled(True)
+
+        self.new_btn = QtWidgets.QPushButton(self.centralwidget)
+        self.new_btn.setGeometry(QtCore.QRect(400, 10, 100, 50))
+        self.new_btn.setObjectName("new_btn")
+        self.new_btn.clicked.connect(self.new_schedule)
+
         self.Algorithm_Box = QtWidgets.QGroupBox(self.centralwidget)
         self.Algorithm_Box.setGeometry(QtCore.QRect(10, 10, 251, 80))
         self.Algorithm_Box.setLayoutDirection(QtCore.Qt.LeftToRight)
@@ -55,6 +65,7 @@ class Ui_MainWindow(object):
         self.quantum = QtWidgets.QSpinBox(self.Quantum_Box)
         self.quantum.setGeometry(QtCore.QRect(10, 30, 91, 21))
         self.quantum.setObjectName("quantum")
+        self.quantum.setMinimum(1)
         self.preemptive = QtWidgets.QCheckBox(self.centralwidget)
         self.preemptive.setGeometry(QtCore.QRect(280, 70, 121, 31))
         self.preemptive.setObjectName("preemptive")
@@ -94,7 +105,8 @@ class Ui_MainWindow(object):
         self.tasks = QtWidgets.QTableWidget(self.centralwidget)
         self.tasks.setGeometry(QtCore.QRect(10, 220, 741, 281))
         self.tasks.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.tasks.setEditTriggers(QtWidgets.QAbstractItemView.AllEditTriggers)
+        # self.tasks.setEditTriggers(QtWidgets.QAbstractItemView.AllEditTriggers)
+        self.tasks.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tasks.setTabKeyNavigation(False)
         self.tasks.setProperty("showDropIndicator", False)
         self.tasks.setDragDropOverwriteMode(False)
@@ -124,6 +136,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.schedule_btn.setText(_translate("MainWindow", "Schedule"))
+        self.new_btn.setText(_translate("MainWindow", "New"))
         self.Algorithm_Box.setTitle(_translate(
             "MainWindow", "Select Scheduling Algorithm"))
         self.algorithm.setCurrentText(_translate("MainWindow", "FCFS"))
@@ -149,10 +162,7 @@ class Ui_MainWindow(object):
         item = self.tasks.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "Priority"))
         item = self.tasks.horizontalHeaderItem(4)
-        item.setText(_translate("MainWindow", "Edit"))
-
-    #
-    #
+        item.setText(_translate("MainWindow", "Delete"))
 
     def select_algorithm(self, text):
         self.scheduling_algorithm = str(text)
@@ -181,6 +191,7 @@ class Ui_MainWindow(object):
             self.tasks.setColumnHidden(3, False)
 
     def addTask(self):
+        self.schedule_btn.setDisabled(False)
         name = str(self.task_name.text())
         arrive_time = str(self.arrive_time.text())
         burst = str(self.burst.text())
@@ -188,27 +199,46 @@ class Ui_MainWindow(object):
 
         task = dict(task=name, arrival_time=int(arrive_time),
                     burst_time=int(burst), priority=priority)
-        
+
         global task_list
-        task_list.append(task)
+        self.msg = QtWidgets.QMessageBox()
 
-        rowPosition = self.tasks.rowCount()
-        self.tasks.insertRow(rowPosition)
-        self.tasks.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(name))
-        self.tasks.setItem(
-            rowPosition, 1, QtWidgets.QTableWidgetItem(arrive_time))
-        self.tasks.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(burst))
-        self.tasks.setItem(
-            rowPosition, 3, QtWidgets.QTableWidgetItem(priority))
+        if len(list(filter(lambda x: x['task'] == task['task'], task_list))) != 0:
+            self.msg = QtWidgets.QMessageBox()
+            self.msg.setWindowTitle("Warning")
+            self.msg.setText("Task already exists")
+            self.msg.setIcon(QMessageBox.Warning)
+            self.msg.setStandardButtons(QMessageBox.Ok)
+            self.msg.show()
+        else:
+            task_list.append(task)
 
-        delete_btn = QtWidgets.QPushButton(self.tasks)
-        self.tasks.setCellWidget(rowPosition, 4, delete_btn)
+            rowPosition = self.tasks.rowCount()
+            self.tasks.insertRow(rowPosition)
+            self.tasks.setItem(
+                rowPosition, 0, QtWidgets.QTableWidgetItem(name))
+            self.tasks.setItem(
+                rowPosition, 1, QtWidgets.QTableWidgetItem(arrive_time))
+            self.tasks.setItem(
+                rowPosition, 2, QtWidgets.QTableWidgetItem(burst))
+            self.tasks.setItem(
+                rowPosition, 3, QtWidgets.QTableWidgetItem(priority))
 
-        # self.tasks.setItem(
-        #    rowPosition, 4, QtWidgets.QTableWidgetItem('Edit'))
-        # self.schedule_btn.setGeometry(QtCore.QRect(580, 10, 171, 91))
-        # self.schedule_btn.setObjectName("schedule_btn")
-        # self.schedule_btn.clicked.connect(self.schedule)
+            delete_btn = QtWidgets.QPushButton(self.tasks)
+            self.tasks.setCellWidget(rowPosition, 4, delete_btn)
+
+            #current = self.tasks.rowAt(rowPosition)
+            delete_btn.clicked.connect(
+                partial(self.delete_task, task, name))
+
+    def delete_task(self, task, row_name):
+        global task_list
+        row = self.tasks.findItems(row_name, QtCore.Qt.MatchExactly)
+        index = self.tasks.indexFromItem(row[0])
+        self.tasks.removeRow(index.row())
+        task_list.remove(task)
+        if len(task_list) == 0:
+            self.schedule_btn.setDisabled(True)
 
     def schedule(self):
         global task_list
@@ -224,9 +254,9 @@ class Ui_MainWindow(object):
         else:
             output_list = []
         for x in output_list[0]:
-            x["Resource"]=x["Task"]
-            x["Task"]="Processes"
-        
+            x["Resource"] = x["Task"]
+            x["Task"] = "Processes"
+
         self.w = gantt(output_list, self)
         self.w.show()
 
@@ -235,10 +265,17 @@ class Ui_MainWindow(object):
         global task_list
         task_list = []
         self.tasks.setRowCount(0)
-        os.remove("schedule.html")
+        try:
+            os.remove("schedule.html")
+        except:
+            pass
+
         self.task_name.clear()
         self.arrive_time.setValue(0)
         self.burst.setValue(1)
+        self.schedule_btn.setDisabled(True)
+        self.algorithm.setCurrentText("FCFS")
+        self.preemptive.setCheckState(False)
 
 
 if __name__ == "__main__":
